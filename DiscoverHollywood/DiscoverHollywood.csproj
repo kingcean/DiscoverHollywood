@@ -55,12 +55,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\BatchCopy.cs" />
+    <Compile Include="Data\Column.cs" />
     <Compile Include="Data\CsvParser.cs" />
     <Compile Include="Data\DataReader.cs" />
     <Compile Include="Data\DateTimeUtils.cs" />
     <Compile Include="Data\DbHelper.cs" />
     <Compile Include="Import\Job.cs" />
     <Compile Include="Models\Entry.cs" />
+    <Compile Include="Models\Job.cs" />
     <Compile Include="Models\Movie.cs" />
     <Compile Include="Data\Movies.Context.cs">
       <AutoGen>True</AutoGen>

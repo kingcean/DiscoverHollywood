@@ -14,9 +14,10 @@ namespace DiscoverHollywood.Data
 
         public int BatchSize { get; set; } = 1000;
 
-        public void Process(IEnumerable<T> list, IEnumerable<ColumnMappingItem> mapping)
+        public void Process(IEnumerable<T> list)
         {
             var settings = Properties.Settings.Default;
+            var mapping = ColumnMapping.Load(typeof(T));
             using (var bulk = new SqlBulkCopy(settings.ConnectionString))
             {
                 bulk.BatchSize = BatchSize;

@@ -10,48 +10,6 @@ using System.Threading.Tasks;
 
 namespace DiscoverHollywood.Data
 {
-    /// <summary>
-    /// Column mapping.
-    /// </summary>
-    public class ColumnMapping: List<ColumnMappingItem>
-    {
-        /// <summary>
-        /// Adds a column-property-mapping item.
-        /// </summary>
-        /// <param name="columnName">The column name.</param>
-        /// <param name="propertyName">The property name.</param>
-        public void Add(string columnName, string propertyName)
-        {
-            Add(new ColumnMappingItem(columnName, propertyName));
-        }
-    }
-
-    /// <summary>
-    /// Column mapping item.
-    /// </summary>
-    public class ColumnMappingItem
-    {
-        /// <summary>
-        /// Initializes a new instance of the ColumnMappingItem class.
-        /// </summary>
-        /// <param name="columnName">The column name.</param>
-        /// <param name="propertyName">The property name.</param>
-        public ColumnMappingItem(string columnName, string propertyName)
-        {
-            ColumnName = columnName;
-            PropertyName = propertyName;
-        }
-
-        /// <summary>
-        /// Gets or sets the column name of the table.
-        /// </summary>
-        public string ColumnName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the propery name of the class.
-        /// </summary>
-        public string PropertyName { get; set; }
-    }
 
     /// <summary>
     /// Reads a forward-only stream of rows from a collection.

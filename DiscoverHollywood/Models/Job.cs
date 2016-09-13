@@ -12,22 +12,25 @@ namespace DiscoverHollywood.Models
         {
             var where = new StringBuilder();
             var parameters = new List<object>();
-            Data.DbHelper.AppendLikeParameter("name", name, true, true, where, parameters);
+            var hasParam = Data.DbHelper.AppendLikeParameter("name", name, true, true, where, parameters, null);
             if (year.HasValue)
             {
-                where.AppendFormat("[year] = {0}", year);
+                where.AppendFormat("{1}[year] = {0}", year, hasParam ? "AND " : null);
             }
 
-            Data.DbHelper.AppendLikeParameter("genres", genres, true, true, where, parameters);
-            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, where.ToString(), (pageIndex + 1) * pageSize, null, true, pageIndex * pageSize, parameters);
+            Data.DbHelper.AppendLikeParameter("genres", genres, true, true, where, parameters, hasParam ? "AND" : null);
+            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, where.ToString(), (pageIndex + 1) * pageSize, "rating", false, pageIndex * pageSize, parameters);
         }
 
         public static IEnumerable<Movie> ListMovieByCommandLine(string cmd)
         {
             const int pageSize = 50;
-            if (!string.IsNullOrWhiteSpace(cmd)) return new List<Movie>();
-            var nameEndAt = cmd.IndexOf(" -");
-            if (nameEndAt < 0) return Movies(cmd, null, null, 0, pageSize);
+            var nameEndAt = !string.IsNullOrWhiteSpace(cmd) ? (cmd.IndexOf("-") == 0 ? 0 : cmd.IndexOf(" -")) : -1;
+            if (nameEndAt < 0)
+            {
+                return Movies(cmd, null, null, 0, pageSize);
+            }
+
             var name = cmd.Substring(0, nameEndAt);
             var rest = cmd.Substring(nameEndAt).Split(new[] { " -" }, StringSplitOptions.RemoveEmptyEntries);
             var year = -1;

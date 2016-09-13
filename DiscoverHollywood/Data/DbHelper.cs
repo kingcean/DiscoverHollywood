@@ -82,7 +82,7 @@ namespace DiscoverHollywood.Data
                         FillParameters(command, parameters);
                         using (var reader = command.ExecuteReader())
                         {
-                            return ConvertToList<T>(reader);
+                            return ConvertToList<T>(reader).ToList();
                         }
                     }
                 }
@@ -99,12 +99,12 @@ namespace DiscoverHollywood.Data
                     var cmd = new StringBuilder();
                     cmd.AppendFormat("SELECT TOP {1} * FROM [dbo].[{0}]", table, top);
                     if (!string.IsNullOrWhiteSpace(where)) cmd.AppendFormat(" WHERE {0}", where);
-                    if (!string.IsNullOrEmpty(sort)) cmd.AppendFormat(" ORDERBY [{0}] {1}", sort, asc ? "ASC" : "DESC");
+                    if (!string.IsNullOrEmpty(sort)) cmd.AppendFormat(" ORDER BY [{0}] {1}", sort, asc ? "ASC" : "DESC");
                     command.CommandText = cmd.ToString();
                     FillParameters(command, parameters);
                     using (var reader = command.ExecuteReader())
                     {
-                        return ConvertToList<T>(reader, skip);
+                        return ConvertToList<T>(reader, skip).ToList();
                     }
                 }
             }
@@ -112,21 +112,23 @@ namespace DiscoverHollywood.Data
 
         public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, int skip, params object[] parameters)
         {
-            return List<T>(table, where, top, sort, asc, skip, parameters);
+            return List<T>(table, where, top, sort, asc, skip, parameters.ToList());
         }
 
-        public static void AppendParameter(string columnName, object value, string op, StringBuilder where, ICollection<object> parameters, string prefix = null, string suffix = null)
+        public static bool AppendParameter(string columnName, object value, string op, StringBuilder where, ICollection<object> parameters, string prefix = null, string suffix = null)
         {
-            if (string.IsNullOrWhiteSpace(columnName)) return;
+            if (string.IsNullOrWhiteSpace(columnName)) return false;
             where.AppendFormat("[{0}] {1} @field{2} ", columnName, op, parameters.Count);
             parameters.Add(value);
+            return true;
         }
 
-        public static void AppendLikeParameter(string columnName, string value, bool leftPadding, bool rightPadding, StringBuilder where, ICollection<object> parameters)
+        public static bool AppendLikeParameter(string columnName, string value, bool leftPadding, bool rightPadding, StringBuilder where, ICollection<object> parameters, string opBefore)
         {
-            if (string.IsNullOrWhiteSpace(columnName) || string.IsNullOrWhiteSpace(value)) return;
-            where.AppendFormat("[{0}] LIKE @field{1} ", columnName, parameters.Count);
+            if (string.IsNullOrWhiteSpace(columnName) || string.IsNullOrWhiteSpace(value)) return false;
+            where.AppendFormat("{2}[{0}] LIKE @field{1} ", columnName, parameters.Count, !string.IsNullOrWhiteSpace(opBefore) ? opBefore + " " : null);
             parameters.Add(string.Format("{0}{1}{2}", leftPadding ? "%" : string.Empty, value, rightPadding ? "%" : string.Empty));
+            return true;
         }
 
         static void FillParameters(DbCommand command, IEnumerable<object> parameters)
@@ -137,7 +139,7 @@ namespace DiscoverHollywood.Data
             {
                 var dbp = command.CreateParameter();
                 dbp.ParameterName = "@field" + index.ToString();
-                dbp.Value = parameters;
+                dbp.Value = parameter;
                 command.Parameters.Add(dbp);
                 index++;
             }
@@ -156,7 +158,7 @@ namespace DiscoverHollywood.Data
                 {
                     var colName = reader.GetName(i);
                     var colInfo = mapping.FirstOrDefault((item) => { return item.ColumnName == colName; });
-                    if (colInfo == null) continue;
+                    if (colInfo == null || reader.IsDBNull(i)) continue;
                     var colValue = reader.GetValue(i);
                     typeof(T).GetProperty(colInfo.PropertyName).SetValue(obj, colValue);
                 }

@@ -43,10 +43,10 @@ namespace DiscoverHollywood
                         var list = Models.Job.ListMovieByCommandLine(string.Join(" ", args.Skip(1)));
                         foreach (var item in list)
                         {
-                            Console.WriteLine("{0} \t{1} ({2})\t ★{3}", item.Id, item.Name, item.Year, item.Rating);
+                            Console.WriteLine("{0} \t{1} ({2}) \t★{3:0.0}", item.Id, item.Name, item.Year, item.Rating);
                         }
 
-                        ConsoleUtils.Log(ref rec, "list movies");
+                        ConsoleUtils.Log(ref rec, "listing movies");
                         break;
                     }
 
@@ -60,8 +60,16 @@ namespace DiscoverHollywood
                         int id;
                         if (!int.TryParse(args[1], out id)) break;
                         var entry = Models.Job.Movie(id);
-                        Console.WriteLine("{1} ({2})\t ★{3}{0}{4}", Environment.NewLine, entry.Name, entry.Year, entry.Rating, entry.Genres);
-                        ConsoleUtils.Log(ref rec, "list movies");
+                        if (entry != null)
+                        {
+                            Console.WriteLine("{1} ({2})\t ★{3:0.0}{0}{4}", Environment.NewLine, entry.Name, entry.Year, entry.Rating, string.Join("; ", entry.Genres));
+                        }
+                        else
+                        {
+                            ConsoleUtils.Log(ref rec, "No such movie.");
+                        }
+
+                        ConsoleUtils.Log(ref rec, "getting a movie");
                         break;
                     }
 

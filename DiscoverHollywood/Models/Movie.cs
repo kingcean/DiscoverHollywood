@@ -8,9 +8,21 @@ namespace DiscoverHollywood.Models
 {
     public class Movie
     {
+        private string name;
+
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+            }
+        }
 
 
         public int Year { get; set; }
@@ -21,13 +33,13 @@ namespace DiscoverHollywood.Models
         {
             get
             {
-                return !string.IsNullOrWhiteSpace(GenresStr) ? GenresStr.Split(';').ToList() : new List<string>();
+                return !string.IsNullOrWhiteSpace(GenresStr) ? GenresStr.Trim().Split(';').ToList() : new List<string>();
             }
         }
 
         public string Thumbnail { get; set; }
 
-        public int? Rating { get; set; }
+        public double? Rating { get; set; }
 
         public string Introduction { get; set; }
 

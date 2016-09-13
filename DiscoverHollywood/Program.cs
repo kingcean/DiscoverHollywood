@@ -50,6 +50,22 @@ namespace DiscoverHollywood
                         break;
                     }
 
+                case "ENABLE":
+                case "DISABLE":
+                    {
+                        var enable = key == "ENABLE" ? true : false;
+                        if (args.Length < 2) break;
+                        var field = args[1];
+                        if (string.IsNullOrWhiteSpace(field)) break;
+                        switch (field.Trim().ToUpper())
+                        {
+                            case "TAGS":
+                                Import.Job.DisableTags = !enable;
+                                break;
+                        }
+
+                        break;
+                    }
                 case "GET":
                 case "ONE":
                 case "ITEM":

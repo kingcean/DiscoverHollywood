@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+    <div id="page_container" style="display: none;">
+        <div class="detail" data-bind="if: detail">
+            <a href="./" data-bind="click: function () { home(); return false; }">&lt; Back</a>
+            <h1 data-bind="text: detail().name"></h1>
+            <p>
+                <span>Year: <span data-bind="text: detail().year"></span>.</span>
+            </p>
+            <div>
+                <div>
+                    <strong>Genres</strong>
+                </div>
+                <ul data-bind="foreach: detail().genres">
+                    <li>
+                        <span data-bind="text: $data"></span>
+                    </li>
+                </ul>
+            </div>
+            <div data-bind="if: rating">
+                <div>
+                    <strong>Rating</strong>
+                </div>
+                <ul data-bind="foreach: rating">
+                    <li>
+                        <span>★<span data-bind="text: (value/count).toFixed(1)"></span> (<span data-bind="text: count"></span> voted in <span data-bind="text: createdYear"></span>)</span>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <div>
+                    <strong>Links</strong>
+                </div>
+                <ul>
+                    <li>
+                        <a target="_blank" data-bind="attr: { href: 'https://movielens.org/movies/' + detail().id }" >MovieLens</a>
+                    </li>
+                    <li>
+                        <a target="_blank" data-bind="attr: { href: 'http://www.imdb.com/title/tt' + $root.paddingNum(detail().imdbId, 7) }">IMDB</a>
+                    </li>
+                    <li>
+                        <a target="_blank" data-bind="attr: { href: 'https://www.themoviedb.org/movie/' + detail().tmdbId }">TMDB</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="collection" data-bind="ifnot: detail">
+            <div>
+                <div>
+                    <input type="search" placeholder="Search..." data-bind="value: q, event: { change: function (data, event) { updateList(); } }" />
+                </div>
+                <ul data-bind="foreach: years">
+                    <li>
+                        <span data-bind="text: $data, click: function () { $root.year($data); $root.updateList(); }, css: { selected: $root.year() == $data }"></span>
+                    </li>
+                </ul>
+                <div>
+                    <label>
+                        Genres
+                        <select data-bind="value: genres, options: genresList, event: { change: function (data, event) { updateList(); } }"></select>
+                    </label>
+                </div>
+            </div>
+            <ul data-bind="foreach: list">
+                <li>
+                    <a data-bind="attr: { href: '?id=' + id }, click: function () { $root.show(id); return false; }">
+                        <strong data-bind="text: name"></strong>
+                        <span data-bind="if: year">(<span data-bind="text: year"></span>)</span>
+                        <em data-bind="if: rating">★<span data-bind="text: rating.toFixed(1)"></span></em>
+                    </a>
+                </li>
+            </ul>
+            <div>
+                <button data-bind="click: getMore">More</button>
+            </div>
+        </div>
+    </div>
+</div>

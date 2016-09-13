@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outFile": "wwwroot/js/site.js",
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "target": "es5"
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ],
+  "compileOnSave": true
+}

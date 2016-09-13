@@ -119,6 +119,7 @@
       <DependentUpon>Movies.edmx</DependentUpon>
       <LastGenOutput>Movies1.cs</LastGenOutput>
     </Content>
+    <Content Include="SQL\Init.sql" />
     <EmbeddedResource Include="SQL\ApplyRatings.sql" />
   </ItemGroup>
   <ItemGroup>

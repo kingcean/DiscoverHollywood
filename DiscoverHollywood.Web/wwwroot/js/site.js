@@ -1,0 +1,172 @@
+/// <reference path="../wwwroot/lib/jquery/dist/jquery.d.ts" />
+/// <reference path="../wwwroot/lib/knockout/dist/knockout.d.ts" />
+var DiscoverHollywood;
+(function (DiscoverHollywood) {
+    function encodeURIParam(value) {
+        return value ? encodeURIComponent(value.toString()) : "";
+    }
+    /**
+      * The page model.
+      */
+    var PageModel = (function () {
+        function PageModel() {
+            this.detail = ko.observable();
+            this.rating = ko.observable();
+            this.years = ko.observableArray();
+            this.list = ko.observableArray();
+            this.page = ko.observable(0);
+            this.year = ko.observable();
+            this.genres = ko.observable();
+            this.q = ko.observable();
+            this.genresList = ["",
+                "Action",
+                "Adventure",
+                "Animation",
+                "Children's",
+                "Comedy",
+                "Crime",
+                "Documentary",
+                "Drama",
+                "Fantasy",
+                "Film-Noir",
+                "Horror",
+                "Musical",
+                "Mystery",
+                "Romance",
+                "Sci-Fi",
+                "Thriller",
+                "War",
+                "Western"
+            ];
+            for (var i = 2016; i > 1995; i--) {
+                this.years.push(i);
+            }
+        }
+        PageModel.prototype.home = function () {
+            this.detail(null);
+            this.rating(null);
+        };
+        PageModel.prototype.getList = function () {
+            return list(this.q(), this.year(), this.genres(), this.page());
+        };
+        PageModel.prototype.updateList = function () {
+            var _this = this;
+            this.getList().then(function (r) {
+                _this.list(r);
+            });
+        };
+        PageModel.prototype.getMore = function () {
+            var _this = this;
+            this.page((this.page() || 0) + 1);
+            this.getList().then(function (r) {
+                (_a = _this.list).push.apply(_a, r);
+                var _a;
+            });
+        };
+        PageModel.prototype.show = function (id) {
+            var _this = this;
+            if (id == null) {
+                this.detail(null);
+                this.rating(null);
+                return;
+            }
+            var selId = getQueryAsInt("id");
+            if (selId != id)
+                history.pushState(selId, null, "?id=" + id);
+            get(id).then(function (r) {
+                _this.detail(r);
+            });
+            rating(id).then(function (r) {
+                _this.rating(r);
+            });
+        };
+        PageModel.prototype.paddingNum = function (value, len) {
+            var str = value.toString();
+            for (var i = str.length; i < len; i++) {
+                str = "0" + str;
+            }
+            return str;
+        };
+        return PageModel;
+    }());
+    DiscoverHollywood.PageModel = PageModel;
+    /**
+      * Lists movies with filter.
+      */
+    function list(name, year, genres, page) {
+        return $.getJSON("/api/movies/?q=" + encodeURIParam(name) + "&year=" + encodeURIParam(year) + "&genres=" + encodeURIParam(genres) + "&page=" + encodeURIComponent(page != null ? page.toString() : ""));
+    }
+    DiscoverHollywood.list = list;
+    /**
+      * Gets a specific movie entry.
+      */
+    function get(id) {
+        return $.getJSON("/api/movies/" + id);
+    }
+    DiscoverHollywood.get = get;
+    /**
+      * Gets a specific movie entry.
+      */
+    function rating(id) {
+        return $.getJSON("/api/movies/" + id + "/ratings");
+    }
+    DiscoverHollywood.rating = rating;
+    /**
+      * Gets query property by given name from URL.
+      * @param name  the property name.
+      */
+    function getQuery(name) {
+        if (name == null)
+            return null;
+        try {
+            if (typeof name === "string") {
+                var result = location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+                if (result == null || result.length < 1) {
+                    return "";
+                }
+                return result[1];
+            }
+            else if (typeof name === "number") {
+                var result = location.search.match(new RegExp("[\?\&][^\?\&]+=[^\?\&]+", "g"));
+                if (result == null) {
+                    return "";
+                }
+                return result[name].substring(1);
+            }
+        }
+        catch (ex) { }
+        return null;
+    }
+    DiscoverHollywood.getQuery = getQuery;
+    function getQueryAsInt(name) {
+        var str = getQuery(name);
+        try {
+            var num = parseInt(str, 10);
+            return num != null && !isNaN(num) ? num : undefined;
+        }
+        catch (ex) {
+            return undefined;
+        }
+    }
+    DiscoverHollywood.getQueryAsInt = getQueryAsInt;
+    function homepage() {
+        var model = new PageModel();
+        var proc = function () {
+            model.page(getQueryAsInt("page") || 0);
+            model.q(getQuery("q"));
+            model.year(getQueryAsInt("year"));
+            model.genres(getQuery("genres"));
+            model.updateList();
+            var selId = getQueryAsInt("id");
+            model.show(selId);
+        };
+        proc();
+        var container = document.getElementById("page_container");
+        ko.applyBindings(model, container);
+        container.style.display = "";
+        window.addEventListener("popstate", function (ev) {
+            proc();
+        });
+    }
+    homepage();
+})(DiscoverHollywood || (DiscoverHollywood = {}));

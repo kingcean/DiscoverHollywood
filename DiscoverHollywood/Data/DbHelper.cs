@@ -22,7 +22,7 @@ namespace DiscoverHollywood.Data
 
         static IEnumerable<string> Tables = new List<string>
         {
-            MoviesTableName, RatingsTableName, TagsTableName
+            MoviesTableName, RatingsTableName, RatingSummaryTableName, TagsTableName
         };
 
         public static SqlConnection CreateConnection()
@@ -89,7 +89,7 @@ namespace DiscoverHollywood.Data
             }
         }
 
-        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, int skip, IEnumerable<object> parameters)
+        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, string sort2, bool asc2, int skip, IEnumerable<object> parameters)
         {
             using (var conn = CreateConnection())
             {
@@ -99,7 +99,15 @@ namespace DiscoverHollywood.Data
                     var cmd = new StringBuilder();
                     cmd.AppendFormat("SELECT TOP {1} * FROM [dbo].[{0}]", table, top);
                     if (!string.IsNullOrWhiteSpace(where)) cmd.AppendFormat(" WHERE {0}", where);
-                    if (!string.IsNullOrEmpty(sort)) cmd.AppendFormat(" ORDER BY [{0}] {1}", sort, asc ? "ASC" : "DESC");
+                    if (!string.IsNullOrEmpty(sort))
+                    {
+                        cmd.AppendFormat(" ORDER BY [{0}] {1}", sort, asc ? "ASC" : "DESC");
+                        if (!string.IsNullOrEmpty(sort2))
+                        {
+                            cmd.AppendFormat(", [{0}] {1}", sort2, asc2 ? "ASC" : "DESC");
+                        }
+                    }
+
                     command.CommandText = cmd.ToString();
                     FillParameters(command, parameters);
                     using (var reader = command.ExecuteReader())
@@ -110,9 +118,9 @@ namespace DiscoverHollywood.Data
             }
         }
 
-        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, int skip, params object[] parameters)
+        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, string sort2, bool asc2, int skip, params object[] parameters)
         {
-            return List<T>(table, where, top, sort, asc, skip, parameters.ToList());
+            return List<T>(table, where, top, sort, asc, sort2, asc2, skip, parameters.ToList());
         }
 
         public static bool AppendParameter(string columnName, object value, string op, StringBuilder where, ICollection<object> parameters, string prefix = null, string suffix = null)

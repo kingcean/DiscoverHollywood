@@ -19,7 +19,7 @@ namespace DiscoverHollywood.Models
             }
 
             Data.DbHelper.AppendLikeParameter("genres", genres, true, true, where, parameters, hasParam ? "AND" : null);
-            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, where.ToString(), (pageIndex + 1) * pageSize, "rating", false, pageIndex * pageSize, parameters);
+            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, where.ToString(), (pageIndex + 1) * pageSize, "rating", false, "year", false, pageIndex * pageSize, parameters);
         }
 
         public static IEnumerable<Movie> ListMovieByCommandLine(string cmd)
@@ -61,7 +61,12 @@ namespace DiscoverHollywood.Models
 
         public static Movie Movie(int id)
         {
-            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, "[id]=" + id.ToString(), 1, null, true, 0).FirstOrDefault();
+            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, "[id]=" + id.ToString(), 1, null, true, null, true, 0).FirstOrDefault();
+        }
+
+        public static IEnumerable<RatingSummary> MovieRatings(int id, int pageIndex = 0, int pageSize = 20)
+        {
+            return Data.DbHelper.List<RatingSummary>(Data.DbHelper.RatingSummaryTableName, "[movie]=" + id.ToString(), (pageIndex + 1) * pageSize, "year", true, null, true, pageIndex * pageSize).ToList();
         }
     }
 }

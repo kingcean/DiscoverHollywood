@@ -8,11 +8,19 @@ namespace DiscoverHollywood.Import
 {
     public static class Job
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether disable tags.
+        /// </summary>
+        public static bool DisableTags { get; set; } = false;
 
+        /// <summary>
+        /// Clears database.
+        /// </summary>
         public static void Clear()
         {
             var rec = DateTime.Now;
-            Data.DbHelper.ClearTable(Data.DbHelper.MoviesTableName, Data.DbHelper.RatingSummaryTableName, Data.DbHelper.TagsTableName);
+            Data.DbHelper.ClearTable(Data.DbHelper.MoviesTableName, Data.DbHelper.RatingSummaryTableName);
+            if (!DisableTags) Data.DbHelper.ClearTable(Data.DbHelper.TagsTableName);
             ConsoleUtils.Log(ref rec, "preparation and clearing database");
         }
 
@@ -38,6 +46,7 @@ namespace DiscoverHollywood.Import
             Data.DbHelper.ExecuteFromResource("ApplyRatings.sql");
             ConsoleUtils.Log(ref rec, "updating ratings to movies");
 
+            if (DisableTags) return;
             var tags = reader.LoadTags();
             var tagCopy = new Data.BatchCopy<Models.Tag>();
             tagCopy.TableName = Data.DbHelper.TagsTableName;

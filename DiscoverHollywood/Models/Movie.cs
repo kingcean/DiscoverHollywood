@@ -9,6 +9,7 @@ namespace DiscoverHollywood.Models
     public class Movie
     {
         private string name;
+        private string genres;
 
         public int Id { get; set; }
 
@@ -18,6 +19,7 @@ namespace DiscoverHollywood.Models
             {
                 return name;
             }
+
             set
             {
                 name = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
@@ -27,7 +29,20 @@ namespace DiscoverHollywood.Models
 
         public int Year { get; set; }
 
-        public string GenresStr { get; set; }
+        public string GenresStr
+        {
+            get
+            {
+                return genres;
+            }
+
+            set
+            {
+                var g = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+                genres = g == "(no genres listed)" ? string.Empty : g;
+            }
+        }
+
 
         public List<string> Genres
         {

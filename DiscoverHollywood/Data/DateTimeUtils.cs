@@ -10,16 +10,16 @@ namespace DiscoverHollywood.Data
     {
         static readonly DateTime begin = new DateTime(1970, 1, 1);
 
-        public static DateTime ParseFromJava(long ticks, int x = 1)
+        public static DateTime ParseFromJava(int milliseconds, int x = 1)
         {
-            var span = new TimeSpan(ticks * x);
+            var span = x == 1000 ? new TimeSpan(0, 0, milliseconds) : new TimeSpan(0, 0, 0, 0, milliseconds * x);
             return begin + span;
         }
 
-        public static DateTime ParseFromJava(string ticks, int x = 1)
+        public static DateTime ParseFromJava(string milliseconds, int x = 1)
         {
-            long num;
-            return long.TryParse(ticks, out num) ? ParseFromJava(num, x) : DateTime.MinValue;
+            int num;
+            return int.TryParse(milliseconds, out num) ? ParseFromJava(num, x) : DateTime.MinValue;
         }
     }
 }

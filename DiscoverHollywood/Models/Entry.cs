@@ -17,6 +17,13 @@ namespace DiscoverHollywood.Models
             {
                 return Id.ToString();
             }
+
+            set
+            {
+                Guid guid;
+                if (!string.IsNullOrWhiteSpace(value) && Guid.TryParse(value.Trim(), out guid)) Id = guid;
+                else Id = Guid.Empty;
+            }
         }
     }
 

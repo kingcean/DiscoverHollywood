@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscoverHollywood", "DiscoverHollywood\DiscoverHollywood.csproj", "{2F677A83-0CCE-433B-BD0E-0E3FEBF2BB0C}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscoverHollywood.Web", "DiscoverHollywood.Web\DiscoverHollywood.Web.xproj", "{710637DA-BCFC-487E-83E4-24CD5EA75C83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{2F677A83-0CCE-433B-BD0E-0E3FEBF2BB0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F677A83-0CCE-433B-BD0E-0E3FEBF2BB0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F677A83-0CCE-433B-BD0E-0E3FEBF2BB0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{710637DA-BCFC-487E-83E4-24CD5EA75C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{710637DA-BCFC-487E-83E4-24CD5EA75C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{710637DA-BCFC-487E-83E4-24CD5EA75C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{710637DA-BCFC-487E-83E4-24CD5EA75C83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

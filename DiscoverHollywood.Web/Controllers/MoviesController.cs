@@ -32,5 +32,12 @@ namespace DiscoverHollywood.Web.Controllers
             return Models.Job.MovieRatings(id);
         }
 
+        // GET api/movies/5/tags
+        [HttpGet("{id}/tags")]
+        public IEnumerable<Models.Tag>Tags(int id)
+        {
+            return Models.Job.MovieTags(id, 0, 50);
+        }
+
     }
 }

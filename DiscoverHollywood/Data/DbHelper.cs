@@ -18,11 +18,13 @@ namespace DiscoverHollywood.Data
 
         public const string RatingSummaryTableName = "RatingSummary";
 
+        public const string MovieGenresTableName = "MovieGenres";
+
         public const string TagsTableName = "Tags";
 
         static IEnumerable<string> Tables = new List<string>
         {
-            MoviesTableName, RatingsTableName, RatingSummaryTableName, TagsTableName
+            MoviesTableName, RatingsTableName, RatingSummaryTableName, MovieGenresTableName, TagsTableName
         };
 
         public static SqlConnection CreateConnection()
@@ -89,40 +91,6 @@ namespace DiscoverHollywood.Data
             }
         }
 
-        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, string sort2, bool asc2, int skip, IEnumerable<object> parameters)
-        {
-            using (var conn = CreateConnection())
-            {
-                conn.Open();
-                using (var command = conn.CreateCommand())
-                {
-                    var cmd = new StringBuilder();
-                    cmd.AppendFormat("SELECT TOP {1} * FROM [dbo].[{0}]", table, top);
-                    if (!string.IsNullOrWhiteSpace(where)) cmd.AppendFormat(" WHERE {0}", where);
-                    if (!string.IsNullOrEmpty(sort))
-                    {
-                        cmd.AppendFormat(" ORDER BY [{0}] {1}", sort, asc ? "ASC" : "DESC");
-                        if (!string.IsNullOrEmpty(sort2))
-                        {
-                            cmd.AppendFormat(", [{0}] {1}", sort2, asc2 ? "ASC" : "DESC");
-                        }
-                    }
-
-                    command.CommandText = cmd.ToString();
-                    FillParameters(command, parameters);
-                    using (var reader = command.ExecuteReader())
-                    {
-                        return ConvertToList<T>(reader, skip).ToList();
-                    }
-                }
-            }
-        }
-
-        public static IEnumerable<T> List<T>(string table, string where, int top, string sort, bool asc, string sort2, bool asc2, int skip, params object[] parameters)
-        {
-            return List<T>(table, where, top, sort, asc, sort2, asc2, skip, parameters.ToList());
-        }
-
         public static bool AppendParameter(string columnName, object value, string op, StringBuilder where, ICollection<object> parameters, string prefix = null, string suffix = null)
         {
             if (string.IsNullOrWhiteSpace(columnName)) return false;
@@ -139,7 +107,7 @@ namespace DiscoverHollywood.Data
             return true;
         }
 
-        static void FillParameters(DbCommand command, IEnumerable<object> parameters)
+        public static void FillParameters(DbCommand command, IEnumerable<object> parameters)
         {
             if (parameters == null) return;
             var index = 0;
@@ -153,7 +121,7 @@ namespace DiscoverHollywood.Data
             }
         }
 
-        static IEnumerable<T> ConvertToList<T>(DbDataReader reader, int skip = 0)
+        public static IEnumerable<T> ConvertToList<T>(DbDataReader reader, int skip = 0)
         {
             var mapping = ColumnMapping.Load(typeof(T));
             var index = -1;
@@ -172,6 +140,72 @@ namespace DiscoverHollywood.Data
                 }
 
                 yield return obj;
+            }
+        }
+    }
+
+    public class ExecuteQuery<T>
+    {
+        public ExecuteQuery(string tableName = null)
+        {
+            TableName = tableName;
+        }
+
+        public string TableName { get; set; }
+
+        public StringBuilder Where { get; } = new StringBuilder();
+
+        public string Sort1 { get; set; }
+
+        public bool Asc1 { get; set; }
+
+        public string Sort2 { get; set; }
+
+        public bool Asc2 { get; set; }
+
+        public string Sort3 { get; set; }
+
+        public bool Asc3 { get; set; }
+
+        public List<object> Parameters { get; } = new List<object>();
+
+        public int AddParameters(params object[] values)
+        {
+            Parameters.AddRange(values);
+            return values.Length;
+        }
+
+        public IEnumerable<T> Process(int top = 0, int skip = 0)
+        {
+            using (var conn = DbHelper.CreateConnection())
+            {
+                conn.Open();
+                using (var command = conn.CreateCommand())
+                {
+                    var cmd = new StringBuilder();
+                    cmd.AppendFormat("SELECT TOP {1} * FROM [dbo].[{0}]", TableName, top);
+                    var where = Where.ToString();
+                    if (!string.IsNullOrWhiteSpace(where)) cmd.AppendFormat(" WHERE {0}", where);
+                    if (!string.IsNullOrEmpty(Sort1))
+                    {
+                        cmd.AppendFormat(" ORDER BY [{0}] {1}", Sort1, Asc1 ? "ASC" : "DESC");
+                        if (!string.IsNullOrEmpty(Sort2))
+                        {
+                            cmd.AppendFormat(", [{0}] {1}", Sort2, Asc2 ? "ASC" : "DESC");
+                            if (!string.IsNullOrEmpty(Sort3))
+                            {
+                                cmd.AppendFormat(", [{0}] {1}", Sort3, Asc3 ? "ASC" : "DESC");
+                            }
+                        }
+                    }
+
+                    command.CommandText = cmd.ToString();
+                    DbHelper.FillParameters(command, Parameters);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        return DbHelper.ConvertToList<T>(reader, skip).ToList();
+                    }
+                }
             }
         }
     }

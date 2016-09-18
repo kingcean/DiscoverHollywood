@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DiscoverHollywood.Import
 {
+    /// <summary>
+    /// The MovieLens csv files loader.
+    /// </summary>
     public class MovieLensFileLoader
     {
         /// <summary>
@@ -87,6 +90,37 @@ namespace DiscoverHollywood.Import
                 if (int.TryParse(linkFields[1], out modelId)) model.ImdbId = modelId;
                 if (int.TryParse(linkFields[2], out modelId)) model.TmdbId = modelId;
                 yield return model;
+            }
+        }
+
+        /// <summary>
+        /// Loads the list from file.
+        /// </summary>
+        /// <returns>A collection of movie loaded.</returns>
+        public IEnumerable<Models.MovieGenres> LoadGenres()
+        {
+            foreach (var line in ReadLines("movies.csv"))
+            {
+                var fields = Data.CsvParser.Instance.ParseLine(line);
+                if (fields.Count < 3)
+                {
+                    continue;
+                }
+
+                int modelId;
+                if (!int.TryParse(fields[0], out modelId))
+                {
+                    continue;
+                }
+
+                var GenresArr = fields[2].Trim().Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var genre in GenresArr)
+                {
+                    var model = new Models.MovieGenres();
+                    model.MovieId = modelId;
+                    model.Genre = genre;
+                    yield return model;
+                }
             }
         }
 

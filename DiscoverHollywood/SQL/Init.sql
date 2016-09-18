@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[Movies](
 	[genres] [nchar](250) NULL,
 	[thumbnail] [nchar](250) NULL,
 	[rating] [float] NULL,
+	[ratingCount] int NULL,
 	[intro] [nchar](250) NULL,
 	[region] [nchar](10) NULL,
 	[imdb] [int] NULL,
@@ -32,6 +33,16 @@ CREATE TABLE [dbo].[RatingSummary](
 	[count] [int] NOT NULL,
 	[year] [int] NOT NULL,
  CONSTRAINT [PK_RatingSummary] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[MovieGenres](
+	[id] [nchar](36) NOT NULL,
+	[movie] [nchar](10) NOT NULL,
+	[genre] [nchar](36) NOT NULL,
+ CONSTRAINT [PK_MovieGenres] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]

@@ -12,7 +12,7 @@ namespace DiscoverHollywood.Data
 
         public static DateTime ParseFromJava(long milliseconds, int x = 1)
         {
-            var span = x == new TimeSpan(milliseconds * x * 10000);
+            var span = new TimeSpan(milliseconds * x * 10000);
             return begin + span;
         }
 

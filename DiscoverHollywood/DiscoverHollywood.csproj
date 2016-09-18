@@ -64,24 +64,6 @@
     <Compile Include="Models\Entry.cs" />
     <Compile Include="Models\Job.cs" />
     <Compile Include="Models\Movie.cs" />
-    <Compile Include="Data\Movies.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Movies.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Movies.cs">
-      <DependentUpon>Movies.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Movies.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Movies.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Movies1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Movies.tt</DependentUpon>
-    </Compile>
     <Compile Include="Import\MovieLens.cs" />
     <Compile Include="Models\Rating.cs" />
     <Compile Include="Models\Tag.cs" />
@@ -95,13 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EntityDeploy Include="Data\Movies.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>Movies.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="Data\Movies.edmx.diagram">
-      <DependentUpon>Movies.edmx</DependentUpon>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -109,16 +84,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\Movies.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Movies.Context.cs</LastGenOutput>
-      <DependentUpon>Movies.edmx</DependentUpon>
-    </Content>
-    <Content Include="Data\Movies.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>Movies.edmx</DependentUpon>
-      <LastGenOutput>Movies1.cs</LastGenOutput>
-    </Content>
     <Content Include="SQL\Init.sql" />
     <EmbeddedResource Include="SQL\ApplyRatings.sql" />
   </ItemGroup>

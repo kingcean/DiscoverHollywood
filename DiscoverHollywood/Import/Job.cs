@@ -13,45 +13,50 @@ namespace DiscoverHollywood.Import
         /// </summary>
         public static bool DisableTags { get; set; } = false;
 
+        public static void CreateDbTables()
+        {
+            var rec = DateTime.Now;
+            Data.DbHelper.ExecuteFromResource("Init.sql");
+            ConsoleUtils.Log(ref rec, "creating tables");
+        }
+
         /// <summary>
         /// Clears database.
         /// </summary>
         public static void Clear()
         {
             var rec = DateTime.Now;
-            Data.DbHelper.ClearTable(Data.DbHelper.MoviesTableName, Data.DbHelper.RatingSummaryTableName);
+            Data.DbHelper.ClearTable(Data.DbHelper.MoviesTableName, Data.DbHelper.RatingSummaryTableName, Data.DbHelper.MovieGenresTableName);
+            ConsoleUtils.Log(ref rec, "clearing tables");
             if (!DisableTags) Data.DbHelper.ClearTable(Data.DbHelper.TagsTableName);
-            ConsoleUtils.Log(ref rec, "preparation and clearing database");
+            ConsoleUtils.Log(ref rec, "clearing tags table");
         }
 
         public static void Init()
         {
             Clear();
-            var rec = DateTime.Now;
             var reader = new MovieLensFileLoader();
             reader.LoadLinks = true;
+            var rec = DateTime.Now;
 
-            var movies = reader.Load();
-            var movieCopy = new Data.BatchCopy<Models.Movie>();
-            movieCopy.TableName = Data.DbHelper.MoviesTableName;
-            movieCopy.Process(movies);
-            ConsoleUtils.Log(ref rec, "loading basic information of movie");
-
-            var ratings = reader.LoadRatings();
-            var ratingCopy = new Data.BatchCopy<Models.RatingSummary>();
-            ratingCopy.TableName = Data.DbHelper.RatingSummaryTableName;
-            ratingCopy.Process(ratings);
-            ConsoleUtils.Log(ref rec, "loading rating summary");
+            FileToDb(reader.Load, Data.DbHelper.MoviesTableName, "loading basic information of movie", ref rec);
+            FileToDb(reader.LoadGenres, Data.DbHelper.MovieGenresTableName, "loading genres for movie", ref rec);
+            FileToDb(reader.LoadRatings, Data.DbHelper.RatingSummaryTableName, "loading rating summary", ref rec);
 
             Data.DbHelper.ExecuteFromResource("ApplyRatings.sql");
             ConsoleUtils.Log(ref rec, "updating ratings to movies");
 
             if (DisableTags) return;
-            var tags = reader.LoadTags();
-            var tagCopy = new Data.BatchCopy<Models.Tag>();
-            tagCopy.TableName = Data.DbHelper.TagsTableName;
-            tagCopy.Process(tags);
-            ConsoleUtils.Log(ref rec, "loading tags");
+            FileToDb(reader.LoadTags, Data.DbHelper.TagsTableName, "loading tags", ref rec);
+        }
+
+        public static void FileToDb<T>(Func<IEnumerable<T>> loader, string tableName, string message, ref DateTime rec)
+        {
+            var list = loader();
+            var copy = new Data.BatchCopy<T>();
+            copy.TableName = tableName;
+            copy.Process(list);
+            ConsoleUtils.Log(ref rec, message);
         }
     }
 }

@@ -7,32 +7,37 @@
         <div class="detail" data-bind="if: detail">
             <a href="./" data-bind="click: function () { home(); return false; }">&lt; Back</a>
             <h1 data-bind="text: detail().name"></h1>
-            <p>
-                <span>Year: <span data-bind="text: detail().year"></span>.</span>
-            </p>
-            <div>
+            <section>
                 <div>
-                    <strong>Genres</strong>
+                    <strong>📅 Year</strong>
+                </div>
+                <p>
+                    <span data-bind="text: detail().year"></span>
+                </p>
+            </section>
+            <section>
+                <div>
+                    <strong>🗂 Genres</strong>
                 </div>
                 <ul data-bind="foreach: detail().genres">
                     <li>
                         <span data-bind="text: $data"></span>
                     </li>
                 </ul>
-            </div>
-            <div data-bind="if: rating">
+            </section>
+            <section data-bind="if: rating">
                 <div>
-                    <strong>Rating</strong>
+                    <strong>★ Ratings</strong>
                 </div>
                 <ul data-bind="foreach: rating">
                     <li>
-                        <span>★<span data-bind="text: (value/count).toFixed(1)"></span> (<span data-bind="text: count"></span> voted in <span data-bind="text: createdYear"></span>)</span>
+                        <span><span data-bind="text: (value/count).toFixed(1)"></span> (<span data-bind="text: count"></span> voted in <span data-bind="text: createdYear"></span>)</span>
                     </li>
                 </ul>
-            </div>
-            <div>
+            </section>
+            <section>
                 <div>
-                    <strong>Links</strong>
+                    <strong>🌐 Links</strong>
                 </div>
                 <ul>
                     <li>
@@ -45,21 +50,36 @@
                         <a target="_blank" data-bind="attr: { href: 'https://www.themoviedb.org/movie/' + detail().tmdbId }">TMDB</a>
                     </li>
                 </ul>
-            </div>
+            </section>
+            <section>
+                <div>
+                    <strong>💬 Latest customized tags</strong>
+                </div>
+                <!-- ko ifnot: tags() && tags().length > 0 -->
+                <p>
+                    <button data-bind="click: showTags">See what people tagged.</button>
+                </p>
+                <!-- /ko -->
+                <!-- ko if: tags() && tags().length > 0 -->
+                <ul data-bind="foreach: tags">
+                    <li>
+                        <span data-bind="text: value"></span>
+                    </li>
+                </ul>
+                <!-- /ko -->
+            </section>
         </div>
         <div class="collection" data-bind="ifnot: detail">
             <div>
-                <div>
-                    <input type="search" placeholder="Search..." data-bind="value: q, event: { change: function (data, event) { updateList(); } }" />
-                </div>
                 <ul data-bind="foreach: years">
                     <li>
                         <span data-bind="text: $data, click: function () { $root.year($data); $root.updateList(); }, css: { selected: $root.year() == $data }"></span>
                     </li>
                 </ul>
                 <div>
+                    <input type="search" placeholder="Search..." data-bind="value: q, event: { change: function (data, event) { updateList(); } }" />
                     <label>
-                        Genres
+                        <span>Genre</span>
                         <select data-bind="value: genres, options: genresList, event: { change: function (data, event) { updateList(); } }"></select>
                     </label>
                 </div>
@@ -73,8 +93,14 @@
                     </a>
                 </li>
             </ul>
-            <div>
+            <div data-bind="if: !isLoading() && list() && list().length < 1">
+                <em>Empty</em>
+            </div>
+            <div data-bind="if: !isLoading() && hasFurther()">
                 <button data-bind="click: getMore">More</button>
+            </div>
+            <div data-bind="if: isLoading()">
+                <span>Loading...</span>
             </div>
         </div>
     </div>

@@ -109,7 +109,7 @@ namespace DiscoverHollywood
     {
         public static void Log(ref DateTime start, string message)
         {
-            Console.WriteLine("Cost {0:0,0}ms for {1}.", (DateTime.Now - start).TotalMilliseconds, message);
+            Console.WriteLine("Cost {0:#,0}ms for {1}.", (DateTime.Now - start).TotalMilliseconds, message);
             start = DateTime.Now;
         }
     }

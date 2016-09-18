@@ -2,11 +2,35 @@
 /// <reference path="../wwwroot/lib/knockout/dist/knockout.d.ts" />
 namespace DiscoverHollywood {
 
+    var settings = {
+        pageSize: 20
+    };
+
     export interface MovieEntry {
-        id: string;
+        id: number;
         name: string;
         year: number;
         genres: string[];
+    }
+
+    export interface RatingSummaryEntry {
+        id: string;
+        value: number;
+        count: number;
+        year: number;
+        movie: number;
+    }
+
+    export interface MovieGenresEntry {
+        id: string;
+        movie: number;
+        genre: string;
+    }
+
+    export interface MovieTagsEntry {
+        id: string;
+        movie: number;
+        value: string;
     }
 
     function encodeURIParam(value: any): string {
@@ -17,13 +41,17 @@ namespace DiscoverHollywood {
       * The page model.
       */
     export class PageModel {
+        hasFurther = ko.observable(false);
         detail = ko.observable<MovieEntry>();
-        rating = ko.observable<any>();
+        rating = ko.observableArray<RatingSummaryEntry>();
         years = ko.observableArray<number>();
         list = ko.observableArray<MovieEntry>();
         page = ko.observable(0);
         year = ko.observable<number>();
         genres = ko.observable<string>();
+        tags = ko.observableArray<MovieTagsEntry>();
+        loadedTags = ko.observable(false);
+        isLoading = ko.observable(false);
         q = ko.observable<string>();
         genresList = ["",
             "Action",
@@ -55,6 +83,8 @@ namespace DiscoverHollywood {
         home() {
             this.detail(null);
             this.rating(null);
+            this.tags(null);
+            history.pushState(null, null, this.getSearchPath());
         }
 
         getList() {
@@ -62,32 +92,81 @@ namespace DiscoverHollywood {
         }
 
         updateList() {
-            this.getList().then((r) => {
+            this.isLoading(true);
+            this.page(0);
+            var promise = this.getList();
+            promise.then((r) => {
+                if (!r) return;
                 this.list(r);
+                this.isLoading(false);
+                if (r.length === 1 && !!r[0]) {
+                    this.show(r[0].id);
+                    return;
+                }
+
+                this.hasFurther(r.length >= settings.pageSize);
+                history.pushState(null, null, this.getSearchPath());
+            }, (r) => {
+                this.isLoading(false);
             });
+            return promise;
+        }
+
+        getSearchPath() {
+            var str = "?";
+            if (!!this.q()) str += (str.length > 1 ? "&" : "") + "q=" + this.q();
+            if (!!this.year()) str += (str.length > 1 ? "&" : "") + "year=" + this.year();
+            if (!!this.genres()) str += (str.length > 1 ? "&" : "") + "genres=" + this.genres();
+            return str;
         }
 
         getMore() {
+            this.isLoading(true);
             this.page((this.page() || 0) + 1);
-            this.getList().then((r) => {
+            var promise = this.getList();
+            promise.then((r) => {
                 this.list.push(...r);
+                this.isLoading(false);
+                this.hasFurther(r.length >= settings.pageSize);
+            }, (r) => {
+                this.isLoading(false);
             });
         }
 
         show(id: number) {
+            this.rating(null);
             if (id == null) {
                 this.detail(null);
-                this.rating(null);
+                this.tags(null);
                 return;
             }
 
             var selId = getQueryAsInt("id");
             if (selId != id) history.pushState(selId, null, `?id=${id}`);
-            get(id).then((r) => {
+            var cache = this.list();
+            var entry: MovieEntry;
+            if (!!cache) cache.some((item) => {
+                if (!item || item.id == null || item.id.toString() !== id.toString()) return false;
+                entry = item;
+                this.detail(entry);
+                return true;
+            });
+            if (!entry) get(id).then((r) => {
+                entry = r;
                 this.detail(r);
             });
             rating(id).then((r) => {
                 this.rating(r);
+            });
+        }
+
+        showTags() {
+            var entry = this.detail();
+            if (!entry || entry.id == null) return;
+            tags(entry.id).then((r) => {
+                var testEntry = this.detail();
+                if (!testEntry || testEntry.id !== entry.id) return;
+                this.tags(!!r && r.length > 0 ? r : [{ value: "(empty)", movie: entry.id, id: null }]);
             });
         }
 
@@ -116,10 +195,17 @@ namespace DiscoverHollywood {
     }
 
     /**
-      * Gets a specific movie entry.
+      * Gets ratings of a specific movie.
       */
-    export function rating(id: number): PromiseLike<MovieEntry> {
+    export function rating(id: number): PromiseLike<RatingSummaryEntry[]> {
         return $.getJSON(`/api/movies/${id}/ratings`);
+    }
+
+    /**
+      * Gets tags of a specific movie.
+      */
+    export function tags(id: number): PromiseLike<MovieTagsEntry[]> {
+        return $.getJSON(`/api/movies/${id}/tags`);
     }
 
     /**
@@ -166,9 +252,10 @@ namespace DiscoverHollywood {
             model.q(getQuery("q"));
             model.year(getQueryAsInt("year"));
             model.genres(getQuery("genres"));
-            model.updateList();
             var selId = getQueryAsInt("id");
-            model.show(selId);
+            model.updateList().then((r) => {
+                model.show(selId);
+            });
         };
         proc();
         var container = document.getElementById("page_container");

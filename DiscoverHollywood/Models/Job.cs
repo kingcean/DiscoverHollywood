@@ -10,16 +10,28 @@ namespace DiscoverHollywood.Models
     {
         public static IEnumerable<Movie> Movies(string name = null, int? year = null, string genres = null, int pageIndex = 0, int pageSize = 20)
         {
-            var where = new StringBuilder();
-            var parameters = new List<object>();
-            var hasParam = Data.DbHelper.AppendLikeParameter("name", name, true, true, where, parameters, null);
+            var search = new Data.ExecuteQuery<Movie>(Data.DbHelper.MoviesTableName);
+            var where = search.Where;
+            var parameters = search.Parameters;
+            var hasParam = false;
             if (year.HasValue)
             {
-                where.AppendFormat("{1}[year] = {0}", year, hasParam ? "AND " : null);
+                where.AppendFormat("[year] = {0}", year);
+                hasParam = true;
             }
 
-            Data.DbHelper.AppendLikeParameter("genres", genres, true, true, where, parameters, hasParam ? "AND" : null);
-            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, where.ToString(), (pageIndex + 1) * pageSize, "rating", false, "year", false, pageIndex * pageSize, parameters);
+            if (!string.IsNullOrWhiteSpace(genres))
+            {
+                where.AppendFormat(" {1}[id] in (SELECT [movie] FROM [dbo].[{0}] WHERE [genre] = @field0)", Data.DbHelper.MovieGenresTableName, hasParam ? "AND " : null);
+                parameters.Add(genres.Trim());
+                hasParam = true;
+            }
+
+            if (Data.DbHelper.AppendLikeParameter("name", name, true, true, where, parameters, hasParam ? " AND" : null)) hasParam = true;
+            search.Sort1 = "rating";
+            search.Sort2 = "ratingCount";
+            search.Sort3 = "year";
+            return search.Process((pageIndex + 1) * pageSize, pageIndex * pageSize);
         }
 
         public static IEnumerable<Movie> ListMovieByCommandLine(string cmd)
@@ -48,6 +60,7 @@ namespace DiscoverHollywood.Models
                         int.TryParse(value, out year);
                         break;
                     case "GENRES":
+                    case "GENRE":
                     case "G":
                         genres = value;
                         break;
@@ -61,12 +74,25 @@ namespace DiscoverHollywood.Models
 
         public static Movie Movie(int id)
         {
-            return Data.DbHelper.List<Movie>(Data.DbHelper.MoviesTableName, "[id]=" + id.ToString(), 1, null, true, null, true, 0).FirstOrDefault();
+            var search = new Data.ExecuteQuery<Movie>(Data.DbHelper.MoviesTableName);
+            search.Where.AppendFormat("[id] = {0}", id);
+            return search.Process(1).FirstOrDefault();
         }
 
         public static IEnumerable<RatingSummary> MovieRatings(int id, int pageIndex = 0, int pageSize = 20)
         {
-            return Data.DbHelper.List<RatingSummary>(Data.DbHelper.RatingSummaryTableName, "[movie]=" + id.ToString(), (pageIndex + 1) * pageSize, "year", true, null, true, pageIndex * pageSize).ToList();
+            var search = new Data.ExecuteQuery<RatingSummary>(Data.DbHelper.RatingSummaryTableName);
+            search.Where.AppendFormat("[movie] = {0}", id);
+            search.Sort1 = "year";
+            return search.Process((pageIndex + 1) * pageSize, pageIndex * pageSize);
+        }
+
+        public static IEnumerable<Tag> MovieTags(int id, int pageIndex = 0, int pageSize = 20)
+        {
+            var search = new Data.ExecuteQuery<Tag>(Data.DbHelper.TagsTableName);
+            search.Where.AppendFormat("[movie] = {0}", id);
+            search.Sort1 = "created";
+            return search.Process((pageIndex + 1) * pageSize, pageIndex * pageSize);
         }
     }
 }

@@ -64,6 +64,11 @@ namespace DiscoverHollywood.Models
 
         public int TmdbId { get; set; }
 
+        public IEnumerable<MovieGenres> GenreModels()
+        {
+            return Genres.Select((item) => { return new MovieGenres { Genre = item, MovieId = Id }; });
+        }
+
         public static Data.ColumnMapping TableMapping()
         {
             var mapping = new Data.ColumnMapping();
@@ -79,5 +84,36 @@ namespace DiscoverHollywood.Models
             mapping.Add("tmdb", "TmdbId");
             return mapping;
         }
+    }
+
+    public class MovieGenres: MovieRelated
+    {
+        private string genre;
+
+        /// <summary>
+        /// Gets or set the genre.
+        /// </summary>
+        public string Genre
+        {
+            get
+            {
+                return genre?.ToString();
+            }
+
+            set
+            {
+                genre = value?.ToString();
+            }
+        }
+
+        public static Data.ColumnMapping TableMapping()
+        {
+            var mapping = new Data.ColumnMapping();
+            mapping.Add("id", "IdString");
+            mapping.Add("movie", "MovieId");
+            mapping.Add("genre", "Genre");
+            return mapping;
+        }
+
     }
 }
